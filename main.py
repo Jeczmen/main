@@ -1,90 +1,72 @@
-"""projekt_1.py: první projekt do Engeto Online Python Akademie
+"""
+Autor: Tomáš Ječmínek
+Email: jecminek.tomas@gmail.com
+Projekt: Tic-tac-toe
+"""
 
-author: Tomáš Ječmínek
-email: jecminek.tomas@gmail.com"""
+def pozdrav():
+    print("Vítej ve hře Piškvorky!")
+    print("Hrajeme na poli 3x3. Hráč 1 má symbol X, hráč 2 má symbol O.")
+    print("Cílem hry je umístit 3 své symboly vedle sebe (horizontálně, vertikálně nebo diagonálně).")
+    print("Pro výběr pole napiš číslo od 1 do 9 podle následujícího rozložení:")
+    zobraz_pole([str(i) for i in range(1, 10)])
 
-TEXTS = [
-    '''Situated about 10 miles west of Kemmerer,
-    Fossil Butte is a ruggedly impressive
-    topographic feature that rises sharply
-    some 1000 feet above Twin Creek Valley
-    to an elevation of more than 7500 feet
-    above sea level. The butte is located just
-    north of US 30 and the Union Pacific Railroad,
-    which traverse the valley.''',
-    '''At the base of Fossil Butte are the bright
-    red, purple, yellow and gray beds of the Wasatch
-    Formation. Eroded portions of these horizontal
-    beds slope gradually upward from the valley floor
-    and steepen abruptly. Overlying them and extending
-    to the top of the butte are the much steeper
-    buff-to-white beds of the Green River Formation,
-    which are about 300 feet thick.''',
-    '''The monument contains 8198 acres and protects
-    a portion of the largest deposit of freshwater fish
-    fossils in the world. The richest fossil fish deposits
-    are found in multiple limestone layers, which lie some
-    100 feet below the top of the butte. The fossils
-    represent several varieties of perch, as well as
-    other freshwater genera and herring similar to those
-    in modern oceans. Other fish such as paddlefish,
-    garpike and stingray are also present.'''
-]
+def zobraz_pole(pole):
+    print()
+    for i in range(0, 9, 3):
+        print(f" {pole[i]} | {pole[i+1]} | {pole[i+2]} ")
+        if i < 6:
+            print("---|---|---")
+    print()
 
-registered_users = {
-    "bob": "123",
-    "ann": "pass123",
-    "mike": "password123",
-    "liz": "pass123"
-}
+def je_vitez(pole, znak):
+    kombinace = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],  # řádky
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],  # sloupce
+        [0, 4, 8], [2, 4, 6]              # diagonály
+    ]
+    for kombinace_tahu in kombinace:
+        if all(pole[i] == znak for i in kombinace_tahu):
+            return True
+    return False
 
-print("Username:", end=" ")
-username = input().strip()
-print("Password:", end=" ")
-password = input().strip()
+def je_remiza(pole):
+    return all(p in ['X', 'O'] for p in pole)
 
-if username not in registered_users or registered_users[username] != password:
-    print("Unregistered user, terminating the program..")
-    exit()
+def vyber_pole(pole, hrac):
+    while True:
+        try:
+            volba = int(input(f"Hráč {hrac} ({'X' if hrac == 1 else 'O'}), zvol číslo pole (1–9): "))
+            if volba < 1 or volba > 9:
+                print("Zadej číslo od 1 do 9.")
+            elif pole[volba - 1] in ['X', 'O']:
+                print("Toto pole je již obsazené. Zvol jiné.")
+            else:
+                return volba - 1
+        except ValueError:
+            print("Neplatný vstup! Zadej číslo od 1 do 9.")
 
-print("-" * 40)
-print(f"Welcome to the app, {username}")
-print("We have 3 texts to be analyzed.")
-print("-" * 40)
+def hlavni():
+    pozdrav()
+    pole = [str(i) for i in range(1, 10)]
+    aktualni_hrac = 1
+    znak_hrace = {1: 'X', 2: 'O'}
 
-try:
-    text_choice = int(input("Enter a number btw. 1 and 3 to select: "))
-    if text_choice < 1 or text_choice > 3:
-        raise ValueError
-except ValueError:
-    print("Invalid selection, terminating the program...")
-    exit()
+    while True:
+        zobraz_pole(pole)
+        index = vyber_pole(pole, aktualni_hrac)
+        pole[index] = znak_hrace[aktualni_hrac]
 
-selected_text = TEXTS[text_choice - 1]
-words = selected_text.split()
+        if je_vitez(pole, znak_hrace[aktualni_hrac]):
+            zobraz_pole(pole)
+            print(f"Hráč {aktualni_hrac} vyhrál! Gratulujeme!")
+            break
+        elif je_remiza(pole):
+            zobraz_pole(pole)
+            print("Remíza! Nikdo nevyhrál.")
+            break
 
-word_count = len(words)
-titlecase_count = sum(1 for word in words if word.istitle())
-uppercase_count = sum(1 for word in words if word.isupper() and word.isalpha())
-lowercase_count = sum(1 for word in words if word.islower())
-numeric_count = sum(1 for word in words if word.isdigit())
-sum_of_numbers = sum(int(word) for word in words if word.isdigit())
+        aktualni_hrac = 2 if aktualni_hrac == 1 else 1
 
-print("-" * 40)
-print(f"There are {word_count} words in the selected text.")
-print(f"There are {titlecase_count} titlecase words.")
-print(f"There are {uppercase_count} uppercase words.")
-print(f"There are {lowercase_count} lowercase words.")
-print(f"There are {numeric_count} numeric strings.")
-print(f"The sum of all the numbers {sum_of_numbers}")
-print("-" * 40)
-
-word_lengths = {}
-for word in words:
-    length = len(word.strip(".,!?"))
-    word_lengths[length] = word_lengths.get(length, 0) + 1
-
-print("LEN|  OCCURRENCES  |NR.")
-print("-" * 40)
-for length, count in sorted(word_lengths.items()):
-    print(f"{length:2}| {'*' * count:<15} |{count}")
+if __name__ == "__main__":
+    hlavni()
